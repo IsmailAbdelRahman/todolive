@@ -1,14 +1,9 @@
-import 'package:bloc/bloc.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/material.dart%20';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:sqflite/sqflite.dart';
+import 'package:todolive/feature/archive_view/presentation/view/archive_view.dart';
+import 'package:todolive/feature/home_todo/presetation/view/todo.dart';
 
-import '../../Modules/Screens/Home.dart';
-import '../../Modules/Screens/Setting.dart';
-import '../../Modules/Screens/todo.dart';
 import 'StateApp.dart';
 
 class CubitApp extends Cubit<SuperstateApp> {
@@ -16,44 +11,22 @@ class CubitApp extends Cubit<SuperstateApp> {
 
   static CubitApp get(context) => BlocProvider.of(context);
 
+  Color bColors = Colors.white;
 /////////////////////////////////
-  // هلسن عليهم من هنا
-  List<Map> MapListID = [];
-  List<Map> MapListDone = [];
-/*
-  Database? database;
-  Database? d1;
-  var K1FloatingActionBar = GlobalKey<ScaffoldState>();
-  bool isBottomShow = false;
-  Color ColorFolatActionBu = Colors.blue;
-  var Controll_Text = TextEditingController();
-  var Controll_Time = TextEditingController();
-  var Controll_Date = TextEditingController();
-  var Keyfrom = GlobalKey<FormState>();
-  IconData icon = Icons.add_circle_outline;
-  Color? c1;
-  Color BColors = Colors.transparent;
-*/
+  List<Map> mapListID = [];
+  List<Map> mapListDone = [];
 
-  List<Widget> itemsScreens = [
-    Container(
-      color: Colors.redAccent,
-    ),
-    const P_Home(),
-    const P_toDo(),
-    const Setting()
-  ];
+  List<Widget> itemsScreens = [ToDoView(), const ArchiveView()];
   int? c1 = 0xff009688;
-  Color Colorr = Colors.redAccent;
-  int index = 1;
+  Color colorr = Colors.transparent;
+  int index = 0;
   Database? database;
   bool isBottomShow = false;
   IconData icon = Icons.add_circle_outline;
-  Color ColorFolatActionBu = Colors.orangeAccent;
+  Color colorFolatActionBu = Colors.blue;
 /////////////////////////////
-// امتا هروح اعمل حاله هناك وميثود هنا لما يكون فيه متغير بلعب ف الارقام بنقص او ازود
-// مثال
-  void ChangeIndext(int indext) {
+
+  void changeIndext(int indext) {
     index = indext;
     emit(IndexStateChange(indext));
   }
@@ -68,20 +41,16 @@ class CubitApp extends Cubit<SuperstateApp> {
         database
             .execute(
                 ' CREATE TABLE TODOLIVE (ID INTEGER PRIMARY KEY ,TITLE TEXT , DATA TEXT , TIME TEXT , STATUS TEXT , COLORCARD INTEGER ) ')
-            .then((value) {
-          print('createTable');
-        }).catchError((error) {
-          print('Error:========= $error');
-        });
+            .then((value) {})
+            .catchError((error) {});
       },
       onOpen: (database) {
-        print('open database ');
         //GetDataBase(database) ;
         //this.database =database;
         // emit(CreateDataBaseState());
       },
     ).then((value) {
-      GetDataBase(value);
+      getDataBase(value);
       database = value;
       emit(CreateDataBaseState());
     });
@@ -89,42 +58,41 @@ class CubitApp extends Cubit<SuperstateApp> {
 
 ////////////////////////////Insert
 
-  Future IInsertDataBase(
-      {String? Title, String? Dtat, String? Time, int? COLORCARD}) async {
+  Future insertDataBase(
+      {String? title, String? data, String? time, int? colorCard}) async {
     return await database!.transaction((txn) => txn
             .rawInsert(
-                'INSERT INTO TODOLIVE(TITLE , DATA , TIME , STATUS , COLORCARD)  VALUES ( "$Title" , "$Dtat" , "$Time" , "New" , "$COLORCARD"  )')
+                'INSERT INTO TODOLIVE(TITLE , DATA , TIME , STATUS , COLORCARD)  VALUES ( "$title" , "$data" , "$time" , "New" , "$colorCard"  )')
             .then((value) {
           emit(IInsertDataBaseState());
-          GetDataBase(database);
+          getDataBase(database);
         }));
   }
 
 /////////////////////////// get
 
-  void GetDataBase(database) {
-    MapListID = [];
-    MapListDone = [];
+  void getDataBase(database) {
+    mapListID = [];
+    mapListDone = [];
     database.rawQuery('SELECT * FROM  TODOLIVE ').then((value) {
       //MapListID = value ,
 
       value.forEach((element) {
         if (element['STATUS'] == 'done') {
-          MapListDone.add(element);
-        } else if (element['STATUS'] == 'New') MapListID.add(element);
+          mapListDone.add(element);
+        } else if (element['STATUS'] == 'New') {
+          mapListID.add(element);
+        }
       });
       emit(GetDataBaseState());
-      print('value print : $value');
-      // print('--------- ${  value[1]['COLORCARD' ]} ');
-      //  Colorr =c1!
     });
   }
 ///////////////////////////////////////
 
-  void DeleteElementDatabase(int id) {
+  void deleteElementDatabase(int id) {
     database!
         .rawDelete('DELETE FROM TODOLIVE WHERE ID = ?', ['$id']).then((value) {
-      GetDataBase(database);
+      getDataBase(database);
       emit(DeleteElementDatabaseState());
     });
   }
@@ -135,22 +103,20 @@ class CubitApp extends Cubit<SuperstateApp> {
     database?.rawUpdate('UPDATE TODOLIVE SET status = ? WHERE id = ? ', [
       state,
       '$id'
-    ]).then((value) => {GetDataBase(database), emit(updateDataBaseState())});
-
-    print('$state , $id');
+    ]).then((value) => {getDataBase(database), emit(UpdateDataBaseState())});
   }
 
   /////////////
 
-  void isButtonState(bool isButtonShowstate1, IconData icon0, Color C1) {
+  void isButtonState(bool isButtonShowstate1, IconData icon0, Color c1) {
     isBottomShow = isButtonShowstate1;
     icon = icon0;
-    ColorFolatActionBu = C1;
+    colorFolatActionBu = c1;
 
     emit(ButtonShowstate());
   }
 
-  Widget ColorsBox(int c) {
+  Widget colorsBox(int c) {
     return GestureDetector(
         onTap: () {
           c1 = c;

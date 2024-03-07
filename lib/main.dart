@@ -1,23 +1,17 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'Modules/Screens/Button_Navi_Bar.dart';
+import 'package:todolive/feature/splash/presentation/views/splash_view.dart';
+
 import 'Shared/ObServer.dart';
 
 void main() {
-  //Bloc.observer = MyBlocObserver ();
-  BlocOverrides.runZoned(
-    // () =>   runApp(const ToDoLive()),
-    () {
-      runApp(const ToDoLive());
-    },
-
-    blocObserver: MyBlocObserver(),
-  );
+  Bloc.observer = MyBlocObserver();
+  runApp(const ToDoLiveApp());
 }
 
-class ToDoLive extends StatelessWidget {
-  const ToDoLive({Key? key}) : super(key: key);
+class ToDoLiveApp extends StatelessWidget {
+  const ToDoLiveApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +22,9 @@ class ToDoLive extends StatelessWidget {
     ]);
     //////////////////////////
 
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: P_ButtonNaviBar(),
-      /*  home: Setting(),*/
+      home: SplashView(),
     );
   }
 }
